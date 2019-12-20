@@ -21,22 +21,26 @@ def create_sensor_csv(sensor_dir, csv_path):
             data = data['DevEUI_uplink']
             timestamp = datetime.strptime(
                 data['Time'][:19], '%Y-%m-%dT%H:%M:%S')
-            if 'payload_hex' in data and data['payload_hex'] != '191':
-                sensor = int(data['payload_hex'][2:], 16)
+            if 'payload_hex' in data and data['payload_hex'] != '191' and len(data['payload_hex']) == 4:
+                sensor = int(data['payload_hex'][2:4], 16)
+                rows.append({
+                    'team_id': team_id,
+                    'DevEUI': data['DevEUI'],
+                    'row_id': row_id,
+                    'timestamp': timestamp,
+                    'lat': float(data['LrrLAT']),
+                    'lng': float(data['LrrLON']),
+                    'sensor': sensor,
+                })
             else:
-                sensor = None
-            rows.append({
-                'team_id': team_id,
-                'DevEUI': data['DevEUI'],
-                'row_id': row_id,
-                'timestamp': timestamp,
-                'lat': float(data['LrrLAT']),
-                'lng': float(data['LrrLON']),
-                'sensor': sensor,
-            })
+                continue
+
     sensor_df = pd.DataFrame(rows)
     sensor_df.to_csv(csv_path)
 
 
 # %%
 create_sensor_csv('dataset/tgr_sensor', 'tgr_sensor.csv')
+
+
+# %%
