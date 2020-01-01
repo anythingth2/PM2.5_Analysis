@@ -94,7 +94,7 @@ def extract_exported_json(json_path, output_sensor_dir, output_location_dir):
 # fetch_tgr_dataset(
 #     'https://tgr2020-quiz.firebaseio.com/quiz/location', 'dataset/tgr_location')
 
-extract_exported_json(json_path='dataset/tgr2020-quiz-export.json',
+extract_exported_json(json_path='dataset/tgr2020-quiz-export latest.json',
                       output_sensor_dir='dataset/tgr_sensor',
                       output_location_dir='dataset/tgr_location'
                       )
