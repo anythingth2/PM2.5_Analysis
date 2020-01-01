@@ -1,5 +1,4 @@
 # %%
-
 from flask import Flask, request
 import pandas as pd
 import numpy as np
@@ -7,12 +6,12 @@ from sklearn.preprocessing import StandardScaler
 from keras.models import load_model
 from sklearn.externals import joblib
 from flask import request
+import settings as settings
 
 # %%
 
 tgr_df = pd.read_csv('dataset/tgr_sensor.csv')
 tgr_df['timestamp'] = pd.to_datetime(tgr_df['timestamp'])
-
 
 ex_region_df = pd.read_csv('dataset/berkeleyearth/region.csv')
 ex_region_df.rename({'Unnamed: 0': 'id'}, axis=1, inplace=True)
@@ -49,13 +48,11 @@ tgr_df['cell_y'] = cells[:, 1]
 
 
 def hourly_tgr_resample(df):
-
     resampled = df.set_index('timestamp').resample('H')
     return resampled['sensor'].mean().reset_index()
 
 
 def daily_tgr_resample(df):
-
     resampled = df.set_index('timestamp').resample('D')
     return resampled['sensor'].mean().reset_index()
 
@@ -64,6 +61,8 @@ hourly_tgr_df = tgr_df.groupby(['cell_x', 'cell_y']).apply(hourly_tgr_resample)
 daily_tgr_df = tgr_df.groupby(['cell_x', 'cell_y']).apply(daily_tgr_resample)
 
 print('initialized tgr dataset')
+
+
 # %%
 
 
@@ -123,10 +122,12 @@ def forecast(city_sensor):
 # %%
 forecasting_sensor_df = ex_daily_sensor_df.groupby('city').apply(forecast)
 print('initialized forecasting')
+
+
 # %%
 
 
-def create_city_info_dict(city_info,):
+def create_city_info_dict(city_info, ):
     return {
         'name': city_info['city'],
         'region': city_info['region'],
@@ -157,6 +158,8 @@ def create_hourly_city(city_info):
     output_dict['history'] = create_sensor_record(
         ex_sensor_df.loc[city_info['city']], 24)
     return output_dict
+
+
 # %%
 
 
@@ -180,14 +183,13 @@ def get_tgr_sensor():
 def get_berkely_sensor():
     period = request.args.get('period')
     if period == 'day':
-        return {'data': ex_region_df.apply(create_daily_city,  axis=1).to_list()}
+        return {'data': ex_region_df.apply(create_daily_city, axis=1).to_list()}
     elif period == 'hour':
         return {'data': ex_region_df.apply(create_hourly_city, axis=1).to_list()}
 
     return {}
 
 
-# %%
+# # %%
 if __name__ == '__main__':
-
-    app.run(debug=True)
+    app.run(host=settings.HOST_IP, port=settings.SERVICE_PORT, debug=settings.DEBUG, use_reloader=settings.DEBUG)
